@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import "./App.css";
 
+const API_URL =
+  "https://customer-churn-prediction-api-jahr.onrender.com";
+
 const initialForm = {
   gender: 1,
   SeniorCitizen: 0,
@@ -41,12 +44,20 @@ function App() {
   const [error, setError] = useState("");
 
   const riskLevel = useMemo(() => {
-    if (!result) return null;
+    if (!result) {
+      return null;
+    }
 
     const probability = result.churn_probability;
 
-    if (probability >= 70) return "High Risk";
-    if (probability >= 40) return "Medium Risk";
+    if (probability >= 70) {
+      return "High Risk";
+    }
+
+    if (probability >= 40) {
+      return "Medium Risk";
+    }
+
     return "Low Risk";
   }, [result]);
 
@@ -89,22 +100,29 @@ function App() {
       setError("");
       setResult(null);
 
-      const response = await fetch("http://127.0.0.1:8000/predict", {
+      const response = await fetch(`${API_URL}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error("Prediction request failed.");
+        const errorData = await response.text();
+        throw new Error(
+          errorData || `Prediction failed with status ${response.status}`
+        );
       }
 
       const data = await response.json();
       setResult(data);
-    } catch {
-      setError("Could not connect to the prediction server.");
+    } catch (requestError) {
+      console.error("Prediction error:", requestError);
+      setError(
+        "Could not connect to the prediction server. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -150,7 +168,11 @@ function App() {
             </p>
           </div>
 
-          <button className="secondary-button" onClick={resetForm}>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={resetForm}
+          >
             Reset Form
           </button>
         </header>
@@ -185,7 +207,9 @@ function App() {
               <Field label="Gender">
                 <select
                   value={formData.gender}
-                  onChange={(e) => updateValue("gender", e.target.value)}
+                  onChange={(event) =>
+                    updateValue("gender", event.target.value)
+                  }
                 >
                   <option value="1">Male</option>
                   <option value="0">Female</option>
@@ -196,7 +220,9 @@ function App() {
                 <OptionSelect
                   value={formData.SeniorCitizen}
                   options={yesNoOptions}
-                  onChange={(value) => updateValue("SeniorCitizen", value)}
+                  onChange={(value) =>
+                    updateValue("SeniorCitizen", value)
+                  }
                 />
               </Field>
 
@@ -222,7 +248,9 @@ function App() {
                   min="0"
                   max="72"
                   value={formData.tenure}
-                  onChange={(e) => updateValue("tenure", e.target.value)}
+                  onChange={(event) =>
+                    updateValue("tenure", event.target.value)
+                  }
                 />
               </Field>
 
@@ -230,15 +258,17 @@ function App() {
                 <OptionSelect
                   value={formData.PhoneService}
                   options={yesNoOptions}
-                  onChange={(value) => updateValue("PhoneService", value)}
+                  onChange={(value) =>
+                    updateValue("PhoneService", value)
+                  }
                 />
               </Field>
 
               <Field label="Multiple Lines">
                 <select
                   value={formData.MultipleLines}
-                  onChange={(e) =>
-                    updateValue("MultipleLines", e.target.value)
+                  onChange={(event) =>
+                    updateValue("MultipleLines", event.target.value)
                   }
                 >
                   <option value="0">No</option>
@@ -250,8 +280,8 @@ function App() {
               <Field label="Internet Service">
                 <select
                   value={formData.InternetService}
-                  onChange={(e) =>
-                    updateValue("InternetService", e.target.value)
+                  onChange={(event) =>
+                    updateValue("InternetService", event.target.value)
                   }
                 >
                   <option value="0">DSL</option>
@@ -264,7 +294,9 @@ function App() {
                 <OptionSelect
                   value={formData.OnlineSecurity}
                   options={internetFeatureOptions}
-                  onChange={(value) => updateValue("OnlineSecurity", value)}
+                  onChange={(value) =>
+                    updateValue("OnlineSecurity", value)
+                  }
                 />
               </Field>
 
@@ -272,7 +304,9 @@ function App() {
                 <OptionSelect
                   value={formData.OnlineBackup}
                   options={internetFeatureOptions}
-                  onChange={(value) => updateValue("OnlineBackup", value)}
+                  onChange={(value) =>
+                    updateValue("OnlineBackup", value)
+                  }
                 />
               </Field>
 
@@ -280,7 +314,9 @@ function App() {
                 <OptionSelect
                   value={formData.DeviceProtection}
                   options={internetFeatureOptions}
-                  onChange={(value) => updateValue("DeviceProtection", value)}
+                  onChange={(value) =>
+                    updateValue("DeviceProtection", value)
+                  }
                 />
               </Field>
 
@@ -288,7 +324,9 @@ function App() {
                 <OptionSelect
                   value={formData.TechSupport}
                   options={internetFeatureOptions}
-                  onChange={(value) => updateValue("TechSupport", value)}
+                  onChange={(value) =>
+                    updateValue("TechSupport", value)
+                  }
                 />
               </Field>
 
@@ -296,7 +334,9 @@ function App() {
                 <OptionSelect
                   value={formData.StreamingTV}
                   options={internetFeatureOptions}
-                  onChange={(value) => updateValue("StreamingTV", value)}
+                  onChange={(value) =>
+                    updateValue("StreamingTV", value)
+                  }
                 />
               </Field>
 
@@ -304,14 +344,18 @@ function App() {
                 <OptionSelect
                   value={formData.StreamingMovies}
                   options={internetFeatureOptions}
-                  onChange={(value) => updateValue("StreamingMovies", value)}
+                  onChange={(value) =>
+                    updateValue("StreamingMovies", value)
+                  }
                 />
               </Field>
 
               <Field label="Contract">
                 <select
                   value={formData.Contract}
-                  onChange={(e) => updateValue("Contract", e.target.value)}
+                  onChange={(event) =>
+                    updateValue("Contract", event.target.value)
+                  }
                 >
                   <option value="0">Month-to-month</option>
                   <option value="1">One year</option>
@@ -323,15 +367,17 @@ function App() {
                 <OptionSelect
                   value={formData.PaperlessBilling}
                   options={yesNoOptions}
-                  onChange={(value) => updateValue("PaperlessBilling", value)}
+                  onChange={(value) =>
+                    updateValue("PaperlessBilling", value)
+                  }
                 />
               </Field>
 
               <Field label="Payment Method">
                 <select
                   value={formData.PaymentMethod}
-                  onChange={(e) =>
-                    updateValue("PaymentMethod", e.target.value)
+                  onChange={(event) =>
+                    updateValue("PaymentMethod", event.target.value)
                   }
                 >
                   <option value="0">Bank transfer automatic</option>
@@ -347,8 +393,8 @@ function App() {
                   min="0"
                   step="0.01"
                   value={formData.MonthlyCharges}
-                  onChange={(e) =>
-                    updateValue("MonthlyCharges", e.target.value)
+                  onChange={(event) =>
+                    updateValue("MonthlyCharges", event.target.value)
                   }
                 />
               </Field>
@@ -359,8 +405,8 @@ function App() {
                   min="0"
                   step="0.01"
                   value={formData.TotalCharges}
-                  onChange={(e) =>
-                    updateValue("TotalCharges", e.target.value)
+                  onChange={(event) =>
+                    updateValue("TotalCharges", event.target.value)
                   }
                 />
               </Field>
@@ -369,6 +415,7 @@ function App() {
             {error && <div className="error-message">{error}</div>}
 
             <button
+              type="button"
               className="primary-button"
               onClick={predictChurn}
               disabled={loading}
@@ -467,7 +514,10 @@ function Field({ label, children }) {
 
 function OptionSelect({ value, options, onChange }) {
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    >
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
